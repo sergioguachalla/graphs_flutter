@@ -24,6 +24,7 @@ class _HomeState extends State<Home> {
   NodeModel? sourceNode;
   NodeModel? targetNode;
   String weight = '';
+  int index = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -86,10 +87,33 @@ class _HomeState extends State<Home> {
                   addEdgeWeight();
                 });
 
-
-
-
               }
+            ),
+          if(mode == Mode.move)
+            GestureDetector(
+              onPanDown: (details){
+                setState(() {
+                  for (int i = 0; i < nodes.length; i++) {
+                    if (nodes[i].isInBounds(details.localPosition)) {
+                      index = i;
+                      break;
+                    }
+                  }
+                });
+              },
+              onPanUpdate: (details){
+                setState((){
+                  if(isInsideScreen(details.localPosition.dx, details.localPosition.dy)){
+                    nodes[index] = nodes[index].copyWith(x: details.localPosition.dx, y: details.localPosition.dy);
+                    updateConnections();
+                  }
+                });
+              },
+              onPanEnd: (details){
+                setState(() {
+                  index = -1;
+                });
+              },
             )
 
         ],
@@ -123,7 +147,11 @@ class _HomeState extends State<Home> {
             ),
             IconButton(
               icon: const Icon(Icons.touch_app_outlined),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  mode = Mode.move;
+                });
+              },
             ),
             IconButton(
               icon: const Icon(Icons.calculate_outlined),
@@ -214,6 +242,30 @@ class _HomeState extends State<Home> {
       content: content,
       actions: actions,
     );
+  }
+  void updateConnections() {
+    String nodeName = nodeLabels[index];
+    List<int> indexes = [];
+    for (int i = 0; i < edgeConnections.length; i++) {
+      if (edgeConnections[i].source == nodeName || edgeConnections[i].target == nodeName) {
+        indexes.add(i);
+      }
+    }
+    for (int i = 0; i < edges.length; i++) {
+      if (indexes.contains(i)) {
+        if (edgeConnections[i].source == nodeName) {
+          edges[i] = edges[i].copyWith(
+            x1: nodes[index].x,
+            y1: nodes[index].y,
+          );
+        } else {
+          edges[i] = edges[i].copyWith(
+            x2: nodes[index].x,
+            y2: nodes[index].y,
+          );
+        }
+      }
+    }
   }
 
 }
