@@ -26,9 +26,21 @@ class NodePainter extends CustomPainter {
       ..addOval(Rect.fromCircle(center: Offset(x, y), radius: radius))
       ..close();
 
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: radius - 12,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
     canvas.drawPath(path, paint);
     canvas.drawPath(path, paintBorder);
-
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(x - radius / 2, y - radius / 2));
 
   }
 

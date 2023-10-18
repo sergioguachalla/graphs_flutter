@@ -11,9 +11,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  String initialValue = '';
   static const double radius = 30;
   Mode mode = Mode.nothing;
   List<NodeModel> nodes = [];
+  List<String> nodeLabels = [];
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +26,19 @@ class _HomeState extends State<Home> {
           if (mode == Mode.add)
             GestureDetector(
               onTapDown: (position) {
-                setState(
-                      () {
-                    if (isInsideScreen(position.localPosition.dx, position.localPosition.dy)) {
-
-                      nodes.add(NodeModel(
-                        Colors.indigoAccent,
-                        position.localPosition.dx,
-                        position.localPosition.dy,
-                        radius,
-                        '',
-                      ));
-                    }
-                  },
+                setState(() {
+                        if (isInsideScreen(position.localPosition.dx,
+                            position.localPosition.dy)) {
+                          nodes.add(NodeModel(
+                            Colors.indigoAccent,
+                            position.localPosition.dx,
+                            position.localPosition.dy,
+                            radius,
+                            '',
+                          ));
+                  addNodeName();
+                        }
+                      },
                 );
               },
             ),
@@ -88,4 +90,45 @@ class _HomeState extends State<Home> {
     }
     return false;
   }
+
+  void addNodeName(){
+    showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: Text('Añadir nombre'),
+        content: TextField(
+          onChanged: (value) {
+            initialValue = value;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                nodes.last = nodes.last.copyWith(text: initialValue);
+                nodeLabels.add(initialValue);
+                initialValue = '';
+                mode = Mode.nothing;
+              });
+              Navigator.of(context).pop();
+            },
+            child: const Text('Añadir'),
+          ),
+        ],
+      );
+    });
+  }
+
+  AlertDialog showAlertDialog(
+      BuildContext context, {
+        required String title,
+        required Widget content,
+        List<Widget> actions = const [],
+      }) {
+    return AlertDialog(
+      title: Text(title),
+      content: content,
+      actions: actions,
+    );
+  }
+
 }
