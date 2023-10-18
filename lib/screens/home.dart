@@ -114,52 +114,96 @@ class _HomeState extends State<Home> {
                   index = -1;
                 });
               },
+            ),
+          if(mode == Mode.delete)
+            GestureDetector(
+              onTapDown: (details){
+                setState(() {
+                  for (int i = 0; i < nodes.length; i++) {
+                    if (nodes[i].isInBounds(details.localPosition)) {
+                      deleteEdges(nodes[i].text);
+                      nodes.removeAt(i);
+                      nodeLabels.removeAt(i);
+                      break;
+                    }
+                  }
+                });
+              },
             )
 
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        height: 56,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.add_box_outlined),
-              onPressed: () {
-                setState(() {
-                  mode = Mode.add;
-                });
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.insert_link_outlined),
-              onPressed: () {
-                setState(() {
-                  mode = Mode.linkSource;
-                  sourceNode = null;
-                  targetNode = null;
-                });
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_forever),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.touch_app_outlined),
-              onPressed: () {
-                setState(() {
-                  mode = Mode.move;
-                });
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.calculate_outlined),
-              onPressed: () {},
-            ),
-          ],
+        bottomNavigationBar: BottomAppBar(
+          height: 56,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: Icon(Icons.add_box_outlined,
+                    color: (mode == Mode.add) ? Colors.blue : Colors.black),
+                onPressed: () {
+                  setState(() {
+                    mode = Mode.add;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.insert_link_outlined,
+                    color: (mode == Mode.linkTarget || mode == Mode.linkSource) ? Colors.blue : Colors.black),
+                onPressed: () {
+                  setState(() {
+                    mode = Mode.linkSource;
+                    sourceNode = null;
+                    targetNode = null;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.delete_forever,
+                    color: (mode == Mode.delete) ? Colors.blue : Colors.black),
+                onPressed: () {
+                  setState(() {
+                    mode = Mode.delete;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.touch_app_outlined,
+                    color: (mode == Mode.move) ? Colors.blue : Colors.black),
+
+                onPressed: () {
+                  setState(() {
+                    mode = Mode.move;
+                  });
+                },
+              ),
+              PopupMenuButton(
+                icon: Icon(Icons.calculate_outlined,
+                    color: (mode == Mode.dijkstra) ? Colors.blue : Colors.black),
+                onOpened: (){
+                  setState(() {
+                    mode = Mode.dijkstra;
+                  });
+                },
+
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    child: Text('Option 1'),
+                    onTap: () {
+                      // Do something when option 1 is tapped.
+                    },
+                  ),
+                  PopupMenuItem(
+                    child: Text('Option 2'),
+                    onTap: () {
+                      // Do something when option 2 is tapped.
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
     );
 
   }
@@ -266,6 +310,24 @@ class _HomeState extends State<Home> {
         }
       }
     }
+  }
+  deleteEdges(String nodeName) {
+    List<int> indexes = [];
+    for (int i = 0; i < edgeConnections.length; i++) {
+      if (edgeConnections[i].source == nodeName || edgeConnections[i].target == nodeName) {
+        indexes.add(i);
+      }
+    }
+    List<EdgeConnection> edgesConnectionsCopy = [];
+    List<EdgeModel> edgesCopy = [];
+    for (int i = 0; i < edgeConnections.length; i++) {
+      if (!indexes.contains(i)) {
+        edgesConnectionsCopy.add(edgeConnections[i]);
+        edgesCopy.add(edges[i]);
+      }
+    }
+    edgeConnections = edgesConnectionsCopy;
+    edges = edgesCopy;
   }
 
 }
