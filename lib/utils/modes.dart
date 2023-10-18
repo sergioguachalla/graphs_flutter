@@ -1,3 +1,3 @@
 enum Mode{
-  nothing, add, link, delete, move, dijkstra
+  nothing, add, linkSource, linkTarget, delete, move, dijkstra
 }

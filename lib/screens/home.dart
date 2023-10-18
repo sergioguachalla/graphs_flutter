@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_graphs/utils/modes.dart';
 
+import '../models/edge_connection.dart';
+import '../widget_models/edge_model.dart';
 import '../widget_models/node_model.dart';
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -16,32 +19,79 @@ class _HomeState extends State<Home> {
   Mode mode = Mode.nothing;
   List<NodeModel> nodes = [];
   List<String> nodeLabels = [];
+  List<EdgeModel> edges = [];
+  List<EdgeConnection> edgeConnections = [];
+  NodeModel? sourceNode;
+  NodeModel? targetNode;
+  String weight = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
+          ...edges,
           ...nodes,
           if (mode == Mode.add)
             GestureDetector(
               onTapDown: (position) {
                 setState(() {
-                        if (isInsideScreen(position.localPosition.dx,
-                            position.localPosition.dy)) {
-                          nodes.add(NodeModel(
-                            Colors.indigoAccent,
-                            position.localPosition.dx,
-                            position.localPosition.dy,
-                            radius,
-                            '',
-                          ));
-                  addNodeName();
-                        }
-                      },
-                );
+                  if (isInsideScreen(position.localPosition.dx,
+                      position.localPosition.dy)) {
+                    nodes.add(NodeModel(
+                      Colors.indigoAccent,
+                      position.localPosition.dx,
+                      position.localPosition.dy,
+                      radius,
+                      '',
+                    ));
+                    addNodeName();
+                  }
+                });
               },
             ),
+          if (mode == Mode.linkSource)
+            GestureDetector(
+              onTapDown: (details) {
+                setState(() {
+                  for (int i = 0; i < nodes.length; i++) {
+                    if (nodes[i].isInBounds(details.localPosition)) {
+                      sourceNode = nodes[i];
+                      break;
+                    }
+                  }
+                  mode = Mode.linkTarget;
+                });
+
+              },
+            ),
+          if(mode == Mode.linkTarget)
+            GestureDetector(
+              onTapDown: (details){
+                setState(() {
+                  for (int i = 0; i < nodes.length; i++) {
+                    if (nodes[i].isInBounds(details.localPosition)) {
+                      targetNode = nodes[i];
+                      break;
+                    }
+                  }
+                  edges.add(EdgeModel(
+                    sourceNode!.x,
+                    sourceNode!.y,
+                    targetNode!.x,
+                    targetNode!.y,
+                    radius,
+                    '',
+                  ));
+                  addEdgeWeight();
+                });
+
+
+
+
+              }
+            )
+
         ],
       ),
       bottomNavigationBar: BottomAppBar(
@@ -59,7 +109,13 @@ class _HomeState extends State<Home> {
             ),
             IconButton(
               icon: const Icon(Icons.insert_link_outlined),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  mode = Mode.linkSource;
+                  sourceNode = null;
+                  targetNode = null;
+                });
+              },
             ),
             IconButton(
               icon: const Icon(Icons.delete_forever),
@@ -77,6 +133,7 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+
   }
 
   bool isInsideScreen(double x, double y) {
@@ -89,6 +146,34 @@ class _HomeState extends State<Home> {
       return true;
     }
     return false;
+  }
+
+  void addEdgeWeight(){
+    showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: Text('Añadir peso'),
+        content: TextField(
+          onChanged: (value) {
+            weight = value;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                edgeConnections.add(EdgeConnection(source: sourceNode!.text, target:targetNode!.text,cost: int.parse(weight)));
+                edges.last = edges.last.copyWith(weight: weight);
+                sourceNode = null;
+                targetNode = null;
+                mode = Mode.nothing;
+              });
+              Navigator.of(context).pop();
+            },
+            child: const Text('Añadir'),
+          ),
+        ],
+      );
+    });
   }
 
   void addNodeName(){
