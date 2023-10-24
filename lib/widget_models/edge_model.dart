@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_graphs/models/edge_painter.dart';
 
+import 'node_model.dart';
+
 class EdgeModel extends StatelessWidget{
   double x1, y1, x2, y2;
   double radius;
@@ -43,4 +45,23 @@ class EdgeModel extends StatelessWidget{
     }
     return false;
   }
+
+  NodeModel getSourceNode(EdgeModel edge, List<NodeModel> nodes) {
+    for (var node in nodes) {
+      if (node.x == edge.x1 && node.y == edge.y1) {
+        return node;
+      }
+    }
+    throw Exception("No source node found for edge");
+  }
+
+  NodeModel getTargetNode(EdgeModel edge, List<NodeModel> nodes) {
+    for (var node in nodes) {
+      if (node.x == edge.x2 && node.y == edge.y2) {
+        return node;
+      }
+    }
+    throw Exception("No target node found for edge");
+  }
+
 }

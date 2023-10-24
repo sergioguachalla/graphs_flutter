@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_graphs/utils/dijkstra.dart';
 import 'package:flutter_graphs/utils/modes.dart';
 
 import '../models/edge_connection.dart';
@@ -25,6 +26,7 @@ class _HomeState extends State<Home> {
   NodeModel? targetNode;
   String weight = '';
   int index = -1;
+  late Dijkstra dijkstra = Dijkstra();
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +70,7 @@ class _HomeState extends State<Home> {
             ),
           if(mode == Mode.linkTarget)
             GestureDetector(
-              onTapDown: (details){
+              onTapDown: (details) async {
                 setState(() {
                   for (int i = 0; i < nodes.length; i++) {
                     if (nodes[i].isInBounds(details.localPosition)) {
@@ -84,8 +86,11 @@ class _HomeState extends State<Home> {
                     radius,
                     '',
                   ));
-                  addEdgeWeight();
+
+                  //dijkstra.addPair(sourceNode!.text, targetNode!.text);
                 });
+                await addEdgeWeight();
+
 
               }
             ),
@@ -129,8 +134,23 @@ class _HomeState extends State<Home> {
                   }
                 });
               },
-            )
+            ),
+          if(mode == Mode.dijkstraMin)
+            GestureDetector(
+              onTapDown: (details){
+                  print(dijkstra.graph);
+              },
+            ),
+          if(mode == Mode.dijkstraMinTarget)
+            GestureDetector(
+              onTapDown: (details){
+                print(dijkstra.graph);
 
+
+
+
+              },
+            ),
         ],
       ),
         bottomNavigationBar: BottomAppBar(
@@ -188,9 +208,13 @@ class _HomeState extends State<Home> {
 
                 itemBuilder: (context) => [
                   PopupMenuItem(
-                    child: Text('Option 1'),
+                    child: Text('Minimizar'),
                     onTap: () {
-                      // Do something when option 1 is tapped.
+                      setState(() {
+                        mode = Mode.dijkstraMin;
+                        print('Minimizar');
+                      });
+
                     },
                   ),
                   PopupMenuItem(
@@ -220,13 +244,15 @@ class _HomeState extends State<Home> {
     return false;
   }
 
-  void addEdgeWeight(){
-    showDialog(context: context, builder: (context) {
+  Future<void> addEdgeWeight() async {
+    await showDialog(context: context, builder: (context) {
       return AlertDialog(
         title: Text('Añadir peso'),
         content: TextField(
           onChanged: (value) {
-            weight = value;
+              weight = value;
+
+
           },
         ),
         actions: [
@@ -235,6 +261,7 @@ class _HomeState extends State<Home> {
               setState(() {
                 edgeConnections.add(EdgeConnection(source: sourceNode!.text, target:targetNode!.text,cost: int.parse(weight)));
                 edges.last = edges.last.copyWith(weight: weight);
+                dijkstra.addConnection(sourceNode!.text, targetNode!.text, int.parse(weight));
                 sourceNode = null;
                 targetNode = null;
                 mode = Mode.nothing;
@@ -329,5 +356,6 @@ class _HomeState extends State<Home> {
     edgeConnections = edgesConnectionsCopy;
     edges = edgesCopy;
   }
+
 
 }
