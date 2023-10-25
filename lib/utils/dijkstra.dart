@@ -1,10 +1,12 @@
 import 'package:dijkstra/dijkstra.dart';
 
-class Dijkstra{
+class DijkstraUtil{
   List<List> pairsList = [];
 
-  Map<String, Map<String, int>> graph = {};
+  Map graph = {};
 
+
+  DijkstraUtil(this.graph);
 
   addPair(String source, String target){
     pairsList.add([source, target]);
@@ -23,6 +25,25 @@ class Dijkstra{
     }
     graph[target]![source] = weight;
   }
+
+  findPath(graph,from, to){
+    var path = Dijkstra.findPathFromGraph(graph, from, to);
+    return path;
+  }
+  findMaxPath(graphD,from, to){
+    setNegativeWeight(graphD);
+    //var path = Dijkstra.findPathFromGraph(graph, from, to);
+    print(graphD);
+  }
+  setNegativeWeight(graph){
+    return graph.forEach((key, innerMap) {
+      innerMap.forEach((innerKey, value) {
+        innerMap[innerKey] = value * -1;
+      });
+    });
+  }
+
+
 
 
 

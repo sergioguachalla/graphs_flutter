@@ -14,7 +14,7 @@ class NodePainter extends CustomPainter {
 
     //Node circle
     Paint paint = Paint()
-        ..color = Colors.indigoAccent
+        ..color = color
         ..style = PaintingStyle.fill;
 
     //Node border

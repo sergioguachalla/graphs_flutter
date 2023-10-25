@@ -15,6 +15,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool isMaximizing = false;
   String initialValue = '';
   static const double radius = 30;
   Mode mode = Mode.nothing;
@@ -26,12 +27,16 @@ class _HomeState extends State<Home> {
   NodeModel? targetNode;
   String weight = '';
   int index = -1;
-  late Dijkstra dijkstra = Dijkstra();
+  Map graph = {};
+  List path = [];
+  Key stateKey = UniqueKey();
+  late DijkstraUtil dijkstra = DijkstraUtil(graph);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
+        key: stateKey,
         children: [
           ...edges,
           ...nodes,
@@ -135,20 +140,38 @@ class _HomeState extends State<Home> {
                 });
               },
             ),
-          if(mode == Mode.dijkstraMin)
+          if(mode == Mode.dijkstraSource)
             GestureDetector(
               onTapDown: (details){
-                  print(dijkstra.graph);
+                setState(() {
+                  for (int i = 0; i < nodes.length; i++) {
+                    if (nodes[i].isInBounds(details.localPosition)) {
+                      sourceNode = nodes[i];
+                      mode = Mode.dijkstraTarget;
+                      //print(dijkstra.findPath(graph, nodes[i].text, 'B'));
+
+                      break;
+                    }
+                  }
+                });
               },
             ),
-          if(mode == Mode.dijkstraMinTarget)
+          if(mode == Mode.dijkstraTarget)
             GestureDetector(
               onTapDown: (details){
-                print(dijkstra.graph);
+                for (int i = 0; i < nodes.length; i++) {
+                  if (nodes[i].isInBounds(details.localPosition)) {
+                    targetNode = nodes[i];
+                    path = dijkstra.findPath(graph, sourceNode!.text, targetNode!.text);
+                    print(graph);
+                    break;
+                  }
+                }
+                setState(() {
+                  changeColor(nodes, edges, path);
 
-
-
-
+                  mode = Mode.nothing;
+                });
               },
             ),
         ],
@@ -199,28 +222,27 @@ class _HomeState extends State<Home> {
               ),
               PopupMenuButton(
                 icon: Icon(Icons.calculate_outlined,
-                    color: (mode == Mode.dijkstra) ? Colors.blue : Colors.black),
-                onOpened: (){
-                  setState(() {
-                    mode = Mode.dijkstra;
-                  });
-                },
+                    color: (mode == Mode.dijkstraTarget  || mode == Mode.dijkstraSource) ? Colors.blue : Colors.black),
 
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     child: Text('Minimizar'),
                     onTap: () {
                       setState(() {
-                        mode = Mode.dijkstraMin;
+                        mode = Mode.dijkstraSource;
                         print('Minimizar');
                       });
 
                     },
                   ),
                   PopupMenuItem(
-                    child: Text('Option 2'),
+                    child: Text('Maximizar'),
                     onTap: () {
-                      // Do something when option 2 is tapped.
+                      setState(() {
+                        isMaximizing = true;
+                        mode = Mode.dijkstraSource;
+                        print('Option 2');
+                      });
                     },
                   ),
                 ],
@@ -341,7 +363,8 @@ class _HomeState extends State<Home> {
   deleteEdges(String nodeName) {
     List<int> indexes = [];
     for (int i = 0; i < edgeConnections.length; i++) {
-      if (edgeConnections[i].source == nodeName || edgeConnections[i].target == nodeName) {
+      if (edgeConnections[i].source == nodeName ||
+          edgeConnections[i].target == nodeName) {
         indexes.add(i);
       }
     }
@@ -355,6 +378,26 @@ class _HomeState extends State<Home> {
     }
     edgeConnections = edgesConnectionsCopy;
     edges = edgesCopy;
+
+    // Eliminar conexiones del grafo
+    graph.remove(nodeName);
+    graph.forEach((key, innerMap) {
+      innerMap.remove(nodeName);
+    });
+  }
+
+  void changeColor(List<NodeModel>nodes, edges, path){
+      for(int i = 0; i < nodes.length; i++){
+        if(path.contains(nodes[i].text)){
+          nodes[i] = nodes[i].copyWith(color: Colors.tealAccent);
+        }
+        else{
+          nodes[i] = nodes[i].copyWith(color: Colors.indigoAccent);
+        }
+      }
+      stateKey = UniqueKey();
+
+
   }
 
 
