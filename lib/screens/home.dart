@@ -27,8 +27,10 @@ class _HomeState extends State<Home> {
   NodeModel? targetNode;
   String weight = '';
   int index = -1;
-  Map graph = {};
+  Map<String, Map<String, int>> graph = {};
   List path = [];
+  List<List<int>> adjacencyMatrix = [];
+
   Key stateKey = UniqueKey();
   late DijkstraUtil dijkstra = DijkstraUtil(graph);
 
@@ -162,14 +164,25 @@ class _HomeState extends State<Home> {
                 for (int i = 0; i < nodes.length; i++) {
                   if (nodes[i].isInBounds(details.localPosition)) {
                     targetNode = nodes[i];
-                    path = dijkstra.findPath(graph, sourceNode!.text, targetNode!.text);
-                    print(graph);
+                    path =
+                    isMaximizing ? dijkstra.findPath(graph, sourceNode!.text, targetNode!.text) : dijkstra.findPath(graph, sourceNode!.text, targetNode!.text);
+                    adjacencyMatrix = dijkstra.adjacencyMatrix(nodeLabels, edgeConnections);
+                    var dist = isMaximizing ?  dijkstra.dijkstraMax(adjacencyMatrix, 0) : null;
+                    print(dist);
+                    //map the index from dist to nodeLabels
+                    List<String> pathNames = [];
+                    for(int i = 0; i < path.length; i++){
+                     if(hasElementAtIndex(nodeLabels, dist![i][i])){
+                       pathNames.add(nodeLabels[dist[i][i]] );
+                     }
+                    }
+                    print(pathNames);
+
                     break;
                   }
                 }
                 setState(() {
                   changeColor(nodes, edges, path);
-
                   mode = Mode.nothing;
                 });
               },
@@ -231,6 +244,8 @@ class _HomeState extends State<Home> {
                       setState(() {
                         mode = Mode.dijkstraSource;
                         print('Minimizar');
+                        isMaximizing = false;
+                        print(isMaximizing);
                       });
 
                     },
@@ -241,7 +256,8 @@ class _HomeState extends State<Home> {
                       setState(() {
                         isMaximizing = true;
                         mode = Mode.dijkstraSource;
-                        print('Option 2');
+                        print('Maximizar');
+                        print(isMaximizing);
                       });
                     },
                   ),
@@ -303,13 +319,16 @@ class _HomeState extends State<Home> {
         title: Text('Añadir nombre'),
         content: TextField(
           onChanged: (value) {
+
             initialValue = value;
           },
         ),
         actions: [
           TextButton(
             onPressed: () {
+
               setState(() {
+
                 nodes.last = nodes.last.copyWith(text: initialValue);
                 nodeLabels.add(initialValue);
                 initialValue = '';
@@ -396,9 +415,13 @@ class _HomeState extends State<Home> {
         }
       }
       stateKey = UniqueKey();
-
-
   }
 
+  bool hasElementAtIndex(List<dynamic> list, int index) {
+    if (index >= 0 && index < list.length) {
+      return true;
+    }
+    return false;
+  }
 
 }
