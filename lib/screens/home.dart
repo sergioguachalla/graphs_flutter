@@ -133,6 +133,8 @@ class _HomeState extends State<Home> {
                       deleteEdges(nodes[i].text);
                       nodes.removeAt(i);
                       nodeLabels.removeAt(i);
+                      path = [];
+                      changeColor(nodes, edges, path);
                       break;
                     }
                   }
@@ -167,6 +169,7 @@ class _HomeState extends State<Home> {
                 }
                 setState(() {
                   changeColor(nodes, edges, path);
+                  //changeEdgeColor(nodes, edges);
                   mode = Mode.nothing;
                 });
               },
@@ -408,21 +411,19 @@ class _HomeState extends State<Home> {
   }
 
   void changeColor(List<NodeModel>nodes, List<EdgeModel> edges, path ){
-      for(int i = 0; i < nodes.length; i++){
-        if(path.contains(nodes[i].text)){
-          nodes[i] = nodes[i].copyWith(color: Colors.tealAccent);
+    for(int i = 0; i < nodes.length; i++){
+      if(path.contains(nodes[i].text)){
+        nodes[i] = nodes[i].copyWith(color: Colors.tealAccent);
+      }
+      else{
+        nodes[i] = nodes[i].copyWith(color: Colors.indigoAccent);
+      }
+    }
 
+    // Actualizar los colores de los edges
 
-        }
-        else{
-          nodes[i] = nodes[i].copyWith(color: Colors.indigoAccent);
-        }
-
+    stateKey = UniqueKey();
   }
-
-      stateKey = UniqueKey();
-  }
-
 
 
 }

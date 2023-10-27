@@ -46,7 +46,7 @@ class EdgePainter extends CustomPainter {
         text: TextSpan(
           text: weight,
           style: TextStyle(
-            color: Colors.red,
+            color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
