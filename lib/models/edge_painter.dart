@@ -7,13 +7,14 @@ class EdgePainter extends CustomPainter {
   String weight;
   double radius;
   bool selfEdge = false;
+  Color color;
 
-  EdgePainter(this.x1, this.y1, this.x2, this.y2, this.weight, this.radius, this.selfEdge);
+  EdgePainter(this.x1, this.y1, this.x2, this.y2, this.weight, this.radius, this.selfEdge, this.color);
   @override
   void paint(Canvas canvas, Size size) {
     if(!selfEdge){
       Paint pencil = Paint()
-        ..color = Colors.black
+        ..color = color
         ..strokeWidth = 2
         ..style = PaintingStyle.fill;
 
@@ -31,7 +32,7 @@ class EdgePainter extends CustomPainter {
       canvas.drawPath(arrowPath, pencil);
 
       Paint edge = Paint()
-        ..color = Colors.black
+        ..color = color
         ..strokeWidth = 2
         ..style = PaintingStyle.stroke;
 
@@ -45,12 +46,12 @@ class EdgePainter extends CustomPainter {
         text: TextSpan(
           text: weight,
           style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
+            color: Colors.red,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
-        textDirection: TextDirection.ltr,
+        textDirection: TextDirection.rtl,
       );
 
       textPainter.layout();
@@ -61,7 +62,7 @@ class EdgePainter extends CustomPainter {
       }
     } else {
       Paint pencil = Paint()
-        ..color = Colors.black
+        ..color = color
         ..strokeWidth = 2
         ..style = PaintingStyle.fill;
 

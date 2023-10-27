@@ -92,13 +92,10 @@ class _HomeState extends State<Home> {
                     targetNode!.y,
                     radius,
                     '',
+                    Colors.black,
                   ));
-
-                  //dijkstra.addPair(sourceNode!.text, targetNode!.text);
                 });
                 await addEdgeWeight();
-
-
               }
             ),
           if(mode == Mode.move)
@@ -150,8 +147,6 @@ class _HomeState extends State<Home> {
                     if (nodes[i].isInBounds(details.localPosition)) {
                       sourceNode = nodes[i];
                       mode = Mode.dijkstraTarget;
-                      //print(dijkstra.findPath(graph, nodes[i].text, 'B'));
-
                       break;
                     }
                   }
@@ -167,17 +162,6 @@ class _HomeState extends State<Home> {
                     path =
                     isMaximizing ? dijkstra.findPath(graph, sourceNode!.text, targetNode!.text) : dijkstra.findPath(graph, sourceNode!.text, targetNode!.text);
                     adjacencyMatrix = dijkstra.adjacencyMatrix(nodeLabels, edgeConnections);
-                    var dist = isMaximizing ?  dijkstra.dijkstraMax(adjacencyMatrix, 0) : null;
-                    print(dist);
-                    //map the index from dist to nodeLabels
-                    List<String> pathNames = [];
-                    for(int i = 0; i < path.length; i++){
-                     if(hasElementAtIndex(nodeLabels, dist![i][i])){
-                       pathNames.add(nodeLabels[dist[i][i]] );
-                     }
-                    }
-                    print(pathNames);
-
                     break;
                   }
                 }
@@ -289,8 +273,6 @@ class _HomeState extends State<Home> {
         content: TextField(
           onChanged: (value) {
               weight = value;
-
-
           },
         ),
         actions: [
@@ -313,28 +295,47 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void addNodeName(){
+  void addNodeName() {
     showDialog(context: context, builder: (context) {
+      String enteredName = ''; // Variable para almacenar el nombre ingresado
+
       return AlertDialog(
         title: Text('Añadir nombre'),
         content: TextField(
           onChanged: (value) {
-
-            initialValue = value;
+            enteredName = value; // Actualiza la variable cuando cambia el valor del TextField
           },
         ),
         actions: [
           TextButton(
             onPressed: () {
-
-              setState(() {
-
-                nodes.last = nodes.last.copyWith(text: initialValue);
-                nodeLabels.add(initialValue);
-                initialValue = '';
-                mode = Mode.nothing;
-              });
-              Navigator.of(context).pop();
+              if (enteredName.isNotEmpty) { // Verifica si el nombre no está vacío
+                bool nameExists = nodes.any((node) => node.text == enteredName);
+                if (!nameExists) { // Verifica si el nombre no existe en nodes
+                  setState(() {
+                    nodes.last = nodes.last.copyWith(text: enteredName);
+                    nodeLabels.add(enteredName);
+                    enteredName = '';
+                    mode = Mode.nothing;
+                  });
+                  Navigator.of(context).pop();
+                } else {
+                  // Muestra un mensaje de error si el nombre ya existe en nodes
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('El nombre ya existe. Por favor, ingresa un nombre diferente.'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                }
+              } else {
+                // Muestra un mensaje de error si el nombre está vacío
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Por favor, ingresa un nombre válido.'),
+                  ),
+                );
+              }
             },
             child: const Text('Añadir'),
           ),
@@ -369,6 +370,7 @@ class _HomeState extends State<Home> {
           edges[i] = edges[i].copyWith(
             x1: nodes[index].x,
             y1: nodes[index].y,
+
           );
         } else {
           edges[i] = edges[i].copyWith(
@@ -405,23 +407,22 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void changeColor(List<NodeModel>nodes, edges, path){
+  void changeColor(List<NodeModel>nodes, List<EdgeModel> edges, path ){
       for(int i = 0; i < nodes.length; i++){
         if(path.contains(nodes[i].text)){
           nodes[i] = nodes[i].copyWith(color: Colors.tealAccent);
+
+
         }
         else{
           nodes[i] = nodes[i].copyWith(color: Colors.indigoAccent);
         }
-      }
+
+  }
+
       stateKey = UniqueKey();
   }
 
-  bool hasElementAtIndex(List<dynamic> list, int index) {
-    if (index >= 0 && index < list.length) {
-      return true;
-    }
-    return false;
-  }
+
 
 }

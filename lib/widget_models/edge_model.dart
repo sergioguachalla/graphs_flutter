@@ -7,17 +7,17 @@ class EdgeModel extends StatelessWidget{
   double x1, y1, x2, y2;
   double radius;
   String weight;
-
-  EdgeModel(this.x1, this.y1, this.x2, this.y2, this.radius, this.weight);
+  Color color;
+  EdgeModel(this.x1, this.y1, this.x2, this.y2, this.radius, this.weight, this.color);
 
   @override
   Widget build(BuildContext context) {
     if (x1 == x2 && y1 == y2) {
       return CustomPaint(painter: EdgePainter
-        (x1, y1 - radius,  x2 - radius, y2, weight,  radius,  true));
+        (x1, y1 - radius,  x2 - radius, y2, weight,  radius,  true, color));
     }
     return CustomPaint(painter: EdgePainter
-      (x1, y1, x2, y2, weight, radius, false));
+      (x1, y1, x2, y2, weight, radius, false, color));
 
   }
   EdgeModel copyWith({
@@ -27,6 +27,7 @@ class EdgeModel extends StatelessWidget{
     double? y2,
     double? radius,
     String? weight,
+    Color? color,
   }) {
     return EdgeModel(
       x1 ?? this.x1,
@@ -35,6 +36,7 @@ class EdgeModel extends StatelessWidget{
       y2 ?? this.y2,
       radius ?? this.radius,
       weight ?? this.weight,
+      color ?? this.color,
 
 
     );
